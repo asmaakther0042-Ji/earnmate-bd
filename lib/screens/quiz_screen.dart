@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../data/questions.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -8,81 +9,84 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  int currentQuestion = 0;
   int score = 0;
 
-  final String question = "বাংলাদেশের রাজধানীর নাম কী?";
+  void checkAnswer(String selectedAnswer) {
+    if (selectedAnswer == questions[currentQuestion]["answer"]) {
+      score++;
+    }
 
-  final List<String> options = [
-    "চট্টগ্রাম",
-    "ঢাকা",
-    "রাজশাহী",
-    "খুলনা",
-  ];
-
-  final int correctAnswer = 1;
-
-  void checkAnswer(int index) {
-    if (index == correctAnswer) {
+    if (currentQuestion < questions.length - 1) {
       setState(() {
-        score++;
+        currentQuestion++;
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("✅ সঠিক উত্তর!"),
-        ),
-      );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("❌ ভুল উত্তর"),
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text("Quiz Finished"),
+          content: Text(
+            "Your Score: $score / ${questions.length}",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  currentQuestion = 0;
+                  score = 0;
+                });
+              },
+              child: const Text("Restart"),
+            ),
+          ],
         ),
       );
     }
   }
-
-  @override
+   @override
   Widget build(BuildContext context) {
+    final current = questions[currentQuestion];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Quiz"),
+        centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "Score: $score",
+              "Question ${currentQuestion + 1}/${questions.length}",
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            Text(
+              current["question"],
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 30),
 
-            Text(
-              question,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            for (int i = 0; i < options.length; i++)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => checkAnswer(i),
-                    child: Text(options[i]),
-                  ),
+            ...(current["options"] as List<String>).map(
+              (option) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: ElevatedButton(
+                  onPressed: () => checkAnswer(option),
+                  child: Text(option),
                 ),
               ),
+            ),
           ],
         ),
       ),
