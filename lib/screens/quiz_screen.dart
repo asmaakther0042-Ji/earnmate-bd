@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/questions.dart';
+import 'result_screen.dart';
 
 class QuizScreen extends StatefulWidget {
   const QuizScreen({super.key});
@@ -13,7 +14,9 @@ class _QuizScreenState extends State<QuizScreen> {
   int score = 0;
 
   void checkAnswer(String selectedAnswer) {
-    if (selectedAnswer == questions[currentQuestion]["answer"]) {
+    final current = questions[currentQuestion];
+
+    if (selectedAnswer == current["answer"]) {
       score++;
     }
 
@@ -22,68 +25,65 @@ class _QuizScreenState extends State<QuizScreen> {
         currentQuestion++;
       });
     } else {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: const Text("Quiz Finished"),
-          content: Text(
-            "Your Score: $score / ${questions.length}",
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ResultScreen(
+            score: score,
+            totalQuestions: questions.length,
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                setState(() {
-                  currentQuestion = 0;
-                  score = 0;
-                });
-              },
-              child: const Text("Restart"),
-            ),
-          ],
         ),
       );
     }
   }
-   @override
+
+  @override
   Widget build(BuildContext context) {
     final current = questions[currentQuestion];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Quiz"),
+        title: const Text("EarnMate BD Quiz"),
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "Question ${currentQuestion + 1}/${questions.length}",
+              "Question ${currentQuestion + 1} / ${questions.length}",
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 30),
 
             Text(
               current["question"],
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             const SizedBox(height: 30),
 
             ...(current["options"] as List<String>).map(
               (option) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.only(bottom: 12),
                 child: ElevatedButton(
                   onPressed: () => checkAnswer(option),
-                  child: Text(option),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      option,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                  ),
                 ),
               ),
             ),
