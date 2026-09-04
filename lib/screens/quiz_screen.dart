@@ -1,49 +1,109 @@
 import 'package:flutter/material.dart';
-import '../data/questions.dart';
-import 'result_screen.dart';
+
+import '../data/questions/bangla_questions.dart';
+import '../data/questions/english_questions.dart';
+import '../data/questions/math_questions.dart';
+import '../data/questions/science_questions.dart';
+import '../data/questions/gk_questions.dart';
 
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key});
+  final String category;
+
+  const QuizScreen({
+    super.key,
+    required this.category,
+  });
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
+  late List<Map<String, dynamic>> quizQuestions;
+
   int currentQuestion = 0;
   int score = 0;
 
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.category == "বাংলা") {
+      quizQuestions = banglaQuestions;
+    } else if (widget.category == "English") {
+      quizQuestions = englishQuestions;
+    } else if (widget.category == "Math") {
+      quizQuestions = mathQuestions;
+    } else if (widget.category == "Science") {
+      quizQuestions = scienceQuestions;
+    } else if (widget.category == "General Knowledge") {
+      quizQuestions = gkQuestions;
+    } else {
+      quizQuestions = [
+        ...banglaQuestions,
+        ...englishQuestions,
+        ...mathQuestions,
+        ...scienceQuestions,
+        ...gkQuestions,
+      ];
+    }
+  }
+
   void checkAnswer(String selectedAnswer) {
-    final current = questions[currentQuestion];
+    final current = quizQuestions[currentQuestion];
 
     if (selectedAnswer == current["answer"]) {
       score++;
     }
 
-    if (currentQuestion < questions.length - 1) {
+    if (currentQuestion < quizQuestions.length - 1) {
       setState(() {
         currentQuestion++;
       });
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResultScreen(
-            score: score,
-            totalQuestions: questions.length,
-          ),
-        ),
-      );
+      showResult();
     }
+  }
+
+  void showResult() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Quiz Complete!"),
+          content: Text(
+            "Your Score: $score / ${quizQuestions.length}",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final current = questions[currentQuestion];
+    if (quizQuestions.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text("No questions available."),
+        ),
+      );
+    }
+
+    final current = quizQuestions[currentQuestion];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("EarnMate BD Quiz"),
+        title: Text(widget.category),
         centerTitle: true,
       ),
       body: Padding(
@@ -52,7 +112,7 @@ class _QuizScreenState extends State<QuizScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              "Question ${currentQuestion + 1} / ${questions.length}",
+              "Question ${currentQuestion + 1} / ${quizQuestions.length}",
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -72,20 +132,21 @@ class _QuizScreenState extends State<QuizScreen> {
 
             const SizedBox(height: 30),
 
-            ...(current["options"] as List<String>).map(
-              (option) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: ElevatedButton(
-                  onPressed: () => checkAnswer(option),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
+            ...(current["options"] as List<dynamic>).map(
+              (option) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      checkAnswer(option.toString());
+                    },
                     child: Text(
-                      option,
+                      option.toString(),
                       style: const TextStyle(fontSize: 18),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ),
