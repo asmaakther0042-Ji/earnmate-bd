@@ -8,7 +8,7 @@ class CategoryScreen extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => QuizScreen(),
+        builder: (context) => QuizScreen(category: category),
       ),
     );
   }
