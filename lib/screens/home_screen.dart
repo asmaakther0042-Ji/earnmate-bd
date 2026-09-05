@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'quiz_screen.dart';
+import 'category_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -22,9 +22,7 @@ class HomeScreen extends StatelessWidget {
                 size: 90,
                 color: Colors.green,
               ),
-
               const SizedBox(height: 20),
-
               const Text(
                 "Welcome to EarnMate BD",
                 style: TextStyle(
@@ -32,9 +30,7 @@ class HomeScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               const SizedBox(height: 40),
-
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -43,7 +39,7 @@ class HomeScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const QuizScreen(),
+                        builder: (context) => const CategoryScreen(),
                       ),
                     );
                   },
