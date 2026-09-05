@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../data/questions/bangla_questions.dart';
@@ -24,6 +25,11 @@ class _QuizScreenState extends State<QuizScreen> {
   int currentQuestion = 0;
   int score = 0;
 
+  int timeLeft = 15;
+  Timer? timer;
+
+  bool answered = false;
+
   @override
   void initState() {
     super.initState();
@@ -47,25 +53,62 @@ class _QuizScreenState extends State<QuizScreen> {
         ...gkQuestions,
       ];
     }
+
+    startTimer();
+  }
+
+  void startTimer() {
+    timer?.cancel();
+
+    timeLeft = 15;
+    answered = false;
+
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) {
+        if (timeLeft > 0) {
+          setState(() {
+            timeLeft--;
+          });
+        } else {
+          timer.cancel();
+          nextQuestion();
+        }
+      },
+    );
   }
 
   void checkAnswer(String selectedAnswer) {
+    if (answered) return;
+
+    answered = true;
+
     final current = quizQuestions[currentQuestion];
 
     if (selectedAnswer == current["answer"]) {
       score++;
     }
 
+    nextQuestion();
+  }
+
+  void nextQuestion() {
+    timer?.cancel();
+
     if (currentQuestion < quizQuestions.length - 1) {
       setState(() {
         currentQuestion++;
       });
+
+      startTimer();
     } else {
       showResult();
     }
   }
 
   void showResult() {
+    timer?.cancel();
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -90,6 +133,12 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (quizQuestions.isEmpty) {
       return const Scaffold(
@@ -111,12 +160,24 @@ class _QuizScreenState extends State<QuizScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              "Question ${currentQuestion + 1} / ${quizQuestions.length}",
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Question ${currentQuestion + 1} / ${quizQuestions.length}",
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  "⏱️ $timeLeft",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 30),
@@ -137,9 +198,11 @@ class _QuizScreenState extends State<QuizScreen> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: ElevatedButton(
-                    onPressed: () {
-                      checkAnswer(option.toString());
-                    },
+                    onPressed: answered
+                        ? null
+                        : () {
+                            checkAnswer(option.toString());
+                          },
                     child: Text(
                       option.toString(),
                       style: const TextStyle(fontSize: 18),
