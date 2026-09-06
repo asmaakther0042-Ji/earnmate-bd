@@ -95,43 +95,31 @@ class _QuizScreenState extends State<QuizScreen> {
 
   void nextQuestion() {
     timer?.cancel();
-
-    if (currentQuestion < quizQuestions.length - 1) {
-      setState(() {
-        currentQuestion++;
-      });
-
-      startTimer();
-    } else {
-      showResult();
-    }
-  }
-
-  void showResult() {
-    timer?.cancel();
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Quiz Complete!"),
-          content: Text(
-            "Your Score: $score / ${quizQuestions.length}",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-              child: const Text("OK"),
-            ),
-          ],
-        );
-      },
+  
+      if (currentQuestion < quizQuestions.length - 1) {
+        setState(() {
+          currentQuestion++;
+        });
+  
+        startTimer();
+      } else {
+        showResult();
+      }
+      }
+  
+    void showResult() {
+      timer?.cancel();
+  
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultScreen(
+          score: score,
+          totalQuestions: quizQuestions.length,
+        ),
+      ),
     );
-  }
+}
 
   @override
   void dispose() {
