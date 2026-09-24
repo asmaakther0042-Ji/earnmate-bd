@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'result_screen.dart';
+import '../services/xp_service.dart';
 import '../data/questions/bangla_questions.dart';
 import '../data/questions/english_questions.dart';
 import '../data/questions/math_questions.dart';
@@ -80,17 +81,18 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   void checkAnswer(String selectedAnswer) {
-    if (answered) return;
+  if (answered) return;
 
-    answered = true;
+  answered = true;
 
-    final current = quizQuestions[currentQuestion];
+  final current = quizQuestions[currentQuestion];
 
-    if (selectedAnswer == current["answer"]) {
-      score++;
-    }
+  if (selectedAnswer == current["answer"]) {
+    score++;
+    XPService.addXP(10);
+  }
 
-    nextQuestion();
+  nextQuestion();
   }
 
   void nextQuestion() {
